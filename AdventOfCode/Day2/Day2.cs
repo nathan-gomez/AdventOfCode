@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode.Day2;
+﻿using System.Drawing;
+
+namespace AdventOfCode.Day2;
 
 public class Day2
 {
@@ -34,9 +36,7 @@ public class Day2
         int sum = 0;
         foreach (string line in textLines)
         {
-            var idx1 = line.IndexOf(' ');
-            var idx2 = line.IndexOf(':');
-            int gameSetId = int.Parse(line[idx1..idx2].ToString());
+            int gameSetId = GetGameId(line);
             string[] cubeSets = line.Split("; ");
             cubeSets[0] = cubeSets[0].Replace($"Game {gameSetId}: ", "");
 
@@ -47,6 +47,70 @@ public class Day2
         }
 
         return sum;
+    }
+
+    public int GetMinimumCubesSets()
+    {
+        string[] textLines = File.ReadAllLines(_filePath);
+        int sum = 0;
+        foreach (string line in textLines)
+        {
+            int gameSetId = GetGameId(line);
+            string[] cubeSets = line.Split("; ");
+            cubeSets[0] = cubeSets[0].Replace($"Game {gameSetId}: ", "");
+
+            var minimunCubesUsed = GetMinimumCubes(cubeSets);
+
+            sum += minimunCubesUsed;
+        }
+
+        return sum;
+    }
+
+    private int GetMinimumCubes(string[] cubeSets)
+    {
+        var maxGreenCube = 0;
+        var maxBlueCube = 0;
+        var maxRedCube = 0;
+
+        foreach (string item in cubeSets)
+        {
+            var cubeSet = ExtractCubeData(item);
+
+            for (int i = 0; i < cubeSet.Count; i++)
+            {
+                if (cubeSet[i].Color == "GREEN")
+                {
+                    var maxVal = Math.Max(cubeSet[i].Quantity, maxGreenCube);
+                    maxGreenCube = maxVal;
+                }
+
+                if (cubeSet[i].Color == "RED")
+                {
+                    var maxVal = Math.Max(cubeSet[i].Quantity, maxRedCube);
+                    maxRedCube = maxVal;
+                }
+
+                if (cubeSet[i].Color == "BLUE")
+                {
+                    var maxVal = Math.Max(cubeSet[i].Quantity, maxBlueCube);
+                    maxBlueCube = maxVal;
+                }
+            }
+        }
+
+        var cubeSetPower = maxRedCube * maxGreenCube * maxBlueCube;
+
+        return cubeSetPower;
+    }
+
+    private int GetGameId(string line)
+    {
+        var idx1 = line.IndexOf(' ');
+        var idx2 = line.IndexOf(':');
+        int gameSetId = int.Parse(line[idx1..idx2].ToString());
+
+        return gameSetId;
     }
 
     private bool IsValidGame(string[] cubeSetString)
